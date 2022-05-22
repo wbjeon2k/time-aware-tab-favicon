@@ -9,7 +9,7 @@ const SKIP_THRESHOLD = 2000; // Threshold for removing current visiting tab from
 
 // Constants
 const TIMEOUT = 100;
-const MIN_TO_MS = (20 * 1000);
+const MIN_TO_MS = (60 * 1000);
 
 let currentActiveTabId = undefined;
 //key : tab_id, value : TabInfo object
@@ -89,7 +89,14 @@ function getTabFromList(tab_id, window_id) {
 
 chrome.runtime.onStartup.addListener(
     async () => {
-        console.log("Extension Started");
+        //chrome.runtime.connect();
+        chrome.storage.sync.get(["threshold1", "threshold2"], function (items) {
+            THRESHOLD[0] = items["threshold1"];
+            THRESHOLD[1] = items["threshold2"];
+        });
+        console.log("initial thresholds are: " + THRESHOLD[0] + ", " + THRESHOLD[1]);
+        // Check the tabs periodically 
+
     }
 );
 
@@ -118,8 +125,6 @@ chrome.tabs.onRemoved.addListener(
 
 
 /// Main Logic
-var favicon_red_path = 'icons/favicon_red.png'
-var favicon_orange_path = 'icons/favicon_orange.png'
 //https://stackoverflow.com/questions/6964144/dynamically-generated-favicon
 //https://stackoverflow.com/questions/260857/changing-website-favicon-dynamically
 //https://github.com/sylouuu/chrome-tab-modifier/blob/master/src/js/content.js
@@ -167,8 +172,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
 });
 
+//when currentActiveTabId !== current_tab.id
+//make currentActiveTabId as prev_current_tab
+//set deactivated/activated time
 function updateCurrentTab(current_tab) {
-    if (current_tab.id === undefined) {
+    if (current_tab === undefined) {
         //do nothing
     }
     else if (currentActiveTabId !== current_tab.id) {

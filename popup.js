@@ -6,22 +6,41 @@ var rect_y = 103
 var text_x = 68
 var text_y = 93
 
-ctx.font = 'bold 24px comicsans'
+const margin_between = 260;
+const favicon_size = 35;
+
+console.log("window onload");
+
+drawFavIcons();
+
+function drawFavIcons() {
+    chrome.runtime.sendMessage({ type: "2" }, function (response) {
+
+        // console.log(response["tab_info"]["first"]);
+        // console.log(response["tab_info"]["second"]);
+        if (response.status == 1) {
+            drawFavicon(Array.from(response["tab_info"]["first"]), 0);
+            drawFavicon(Array.from(response["tab_info"]["second"]), 1);
+        }
+    });
+}
+
+ctx.font = 'bold 24px comicsans';
 ctx.fillText('Tab Manager', 30, 50);
 
-ctx.font = 'bold 18px comicsans'
-ctx.textAlign = 'left'
-ctx.fillText('Threshold 2', text_x, text_y);
-ctx.fillText('Threshold 1', text_x + 260, text_y);
+ctx.font = 'bold 18px comicsans';
+ctx.textAlign = 'left';
+ctx.fillText('Threshold 1', text_x, text_y);
+ctx.fillText('Threshold 2', text_x + margin_between, text_y);
 // ctx.fillText('2 hours', text_x, text_y + 200);
-// ctx.fillText('Excepted', text_x + 260, text_y + 200);
+// ctx.fillText('Excepted', text_x + margin_between, text_y + 200);
 
 for (let i = 0; i < 2; i++) {
-    shadowRect(rect_x + 260 * i + 5, rect_y + 5, 215, 155, 10, '#DDDDDD');
+    shadowRect(rect_x + margin_between * i + 5, rect_y + 5, 215, 155, 10, '#DDDDDD');
 
     ctx.fillStyle = '#EEEEEE';
     ctx.strokeStyle = "#CCCCCC"
-    roundRect(ctx, rect_x + 260 * i, rect_y, 220, 160, 10, true, true);
+    roundRect(ctx, rect_x + margin_between * i, rect_y, 220, 160, 10, true, true);
 }
 
 var thresholdBar1 = document.getElementById("thresholdRange1");
@@ -31,17 +50,6 @@ var thresholdValue2 = document.getElementById("thresholdValue2");
 
 var closeButton2 = document.getElementById("closeT2");
 var closeButton1 = document.getElementById("closeT1");
-let tabs_info = [[],[]];
-
-window.onload = function () {
-    chrome.runtime.sendMessage({ type: "2" }, function (response) {
-        console.log(response);
-        console.log(response["tab_info"]["first"]);
-        console.log(response["tab_info"]["second"]);
-        tabs_info[0] = response["tab_info"]["first"];
-        tabs_info[1] = response["tab_info"]["second"];
-    });
-}
 
 chrome.storage.sync.get(["threshold1", "threshold2"], function (items) {
     thresholdBar1.value = items["threshold1"];
@@ -52,14 +60,16 @@ chrome.storage.sync.get(["threshold1", "threshold2"], function (items) {
 
 closeButton2.onclick = function () {
     chrome.runtime.sendMessage({ type: 0, level: 1 }, function (response) {
-        console.log(response.resp);
+        console.log(response);
     });
+    drawFavIcons();
     console.log("Close T2 Clicked");
 }
 closeButton1.onclick = function () {
     chrome.runtime.sendMessage({ type: 0, level: 0 }, function (response) {
-        console.log(response.resp);
+        console.log(response);
     });
+    drawFavIcons();
     console.log("Close T1 Clicked");
 }
 
@@ -67,7 +77,7 @@ thresholdBar1.oninput = function () {
     thresholdValue1.innerHTML = thresholdBar1.value;
     chrome.storage.sync.set({ "threshold1": thresholdBar1.value });
     chrome.runtime.sendMessage({ type: 1, thresholds: [thresholdBar1.value, thresholdBar2.value] }, function (response) {
-        console.log(response.resp);
+        console.log(response);
     });
     console.log(this.value);
 }
@@ -75,17 +85,53 @@ thresholdBar2.oninput = function () {
     thresholdValue2.innerHTML = thresholdBar2.value;
     chrome.storage.sync.set({ "threshold2": thresholdBar2.value });
     chrome.runtime.sendMessage({ type: 1, thresholds: [thresholdBar1.value, thresholdBar2.value] }, function (response) {
-        console.log(response.resp);
+        console.log(response);
     });
     console.log(this.value);
 }
 
-var fav = new Image();
-fav.src = "https://stackoverflow.com/favicon.ico";
-fav.onload = function () {
-    ctx.drawImage(fav, 100, 100, 100, 100);
+// var fav = new Image();
+// fav.src = "https://stackoverflow.com/favicon.ico";
+// fav.onload = function () {
+//     ctx.drawImage(fav, 100, 100, 100, 100);
+// }
+// getFaviconFromUrl("https://stackoverflow.com/favicon.ico", [rect_x + 10, rect_y + 10]);
+// getFaviconFromUrl("https://stackoverflow.com/favicon.ico", [rect_x + (favicon_size + 10) + 10, rect_y + 10]);
+// getFaviconFromUrl("https://stackoverflow.com/favicon.ico", [rect_x + (favicon_size + 10) * 2 + 10, rect_y + 10]);
+
+// getFaviconFromUrl("https://stackoverflow.com/favicon.ico", [rect_x + 10, rect_y + 10 + ((favicon_size) + 10)]);
+// getFaviconFromUrl("https://stackoverflow.com/favicon.ico", [rect_x + (favicon_size + 10) + 10, rect_y + 10 + ((favicon_size) + 10)]);
+// getFaviconFromUrl("https://stackoverflow.com/favicon.ico", [rect_x + (favicon_size + 10) * 2 + 10, rect_y + 10 + ((favicon_size) + 10)]);
+
+// getFaviconFromUrl("https://stackoverflow.com/favicon.ico", [rect_x + 10, rect_y + 10 + ((favicon_size) + 10) * 2]);
+// getFaviconFromUrl("https://stackoverflow.com/favicon.ico", [rect_x + (favicon_size + 10) + 10, rect_y + 10 + ((favicon_size) + 10) * 2]);
+// getFaviconFromUrl("https://stackoverflow.com/favicon.ico", [rect_x + (favicon_size + 10) * 2 + 10, rect_y + 10 + ((favicon_size) + 10) * 2]);
+
+
+// getFaviconFromUrl("https://stackoverflow.com/favicon.ico", [rect_x + margin_between + 10, rect_y + 10]);
+
+function drawFavicon(info_list, level) {
+    info_list.sort(function (a, b) {
+        return a.index - b.index;
+    });
+
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            if (i * 3 + j >= info_list.length) return;
+            getFaviconFromUrl(info_list[i * 3 + j], [rect_x + margin_between * (level) + (favicon_size + 10) * j + 10, rect_y + 10 + ((favicon_size) + 10) * i]);
+        }
+    }
 }
 
+function getFaviconFromUrl(url_body, position) {
+    // const url_head = "https://s2.googleusercontent.com/s2/favicons?domain=";
+    var fav = new Image();
+    fav.src = url_body;
+    fav.onload = function () {
+        ctx.drawImage(fav, position[0], position[1], favicon_size, favicon_size);
+    }
+    return fav;
+}
 function shadowRect(x, y, w, h, repeats, color) {
     ctx.strokeStyle = color;
     ctx.shadowColor = color;
